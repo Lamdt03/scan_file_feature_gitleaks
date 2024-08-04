@@ -1,0 +1,64 @@
+# This file has been auto-generated. Do not edit manually.
+# If you would like to contribute new rules, please use 
+# cmd/generate/config/main.go and follow the contributing guidelines
+# at https://github.com/zricethezav/gitleaks/blob/master/CONTRIBUTING.md
+
+# This is the default gitleaks configuration file.
+# Rules and allowlists are defined within this file.
+# Rules instruct gitleaks on what should be considered a secret.
+# Allowlists instruct gitleaks on what is allowed, i.e. not a secret.
+
+title = "gitleaks config"
+
+[allowlist]
+description = "global allow lists"
+paths = [
+    '''gitleaks.toml''',
+    '''(.*?)(jpg|gif|doc|docx|zip|xls|pdf|bin|svg|socket|vsidx|v2|suo|wsuo|.dll|pdb|exe)$''',
+    '''(go.mod|go.sum)$''',
+    '''gradle.lockfile''',
+    '''node_modules''',
+    '''package-lock.json''',
+    '''yarn.lock''',
+    '''pnpm-lock.yaml''',
+    '''Database.refactorlog''',
+    '''vendor''',
+]
+
+{{ range $i, $rule := .Rules }}[[rules]]
+id = "{{$rule.RuleID}}"
+description = "{{$rule.Description}}"
+regex = '''{{$rule.Regex}}'''
+{{- with $rule.Path }}
+path = '''{{ . }}'''{{ end -}}
+{{- with $rule.SecretGroup }}
+secretGroup = {{ . }}{{ end -}}
+{{- with $rule.Entropy }}
+entropy = {{ . }}{{ end -}}
+{{- with $rule.Keywords }}
+keywords = [
+    {{ range $j, $keyword := . }}"{{ $keyword }}",{{ end }}
+]{{ end }}
+{{- with $rule.Tags }}
+tags = [
+    {{ range $j, $tag := . }}"{{ $tag }}",{{ end }}
+]{{ end }}
+{{ if or $rule.Allowlist.Regexes $rule.Allowlist.Paths $rule.Allowlist.Commits $rule.Allowlist.StopWords }}
+[rules.allowlist]
+{{ with $rule.Allowlist.RegexTarget }}
+regexTarget = "{{ . }}"{{ end -}}
+{{- with $rule.Allowlist.Regexes }}
+regexes = [
+    {{ range $j, $regex := . }}"{{ $regex }}",{{ end }}
+]{{ end }}
+{{- with $rule.Allowlist.Paths }}paths = [
+    {{ range $j, $path := . }}"{{ $path }}",{{ end }}
+]{{ end }}
+{{- with $rule.Allowlist.Commits }}commits = [
+    {{ range $j, $commit := . }}"{{ $commit }}",{{ end }}
+]{{ end }}
+{{- with $rule.Allowlist.StopWords }}stopwords = [{{ range $j, $stopword := . }}
+    "{{ $stopword }}",{{ end }}
+]{{ end }}
+{{ end }}
+{{ end }}
